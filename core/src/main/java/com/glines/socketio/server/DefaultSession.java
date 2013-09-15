@@ -27,7 +27,11 @@ package com.glines.socketio.server;
 import com.glines.socketio.common.ConnectionState;
 import com.glines.socketio.common.DisconnectReason;
 import com.glines.socketio.common.SocketIOException;
+import com.glines.socketio.util.JSON;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -212,6 +216,9 @@ class DefaultSession implements SocketIOSession {
                     LOGGER.log(Level.FINE, "Session[" + sessionId + "]: onMessage: " + message.getData());
                 onMessage(message.getData());
                 break;
+            case EVENT:
+                this.dispatchEvent(message);
+                break;
             default:
                 // Ignore unknown message types
                 break;
@@ -309,6 +316,26 @@ class DefaultSession implements SocketIOSession {
         if (inbound != null) {
             try {
                 inbound.onMessage(SocketIOFrame.TEXT_MESSAGE_TYPE, message);
+            } catch (Throwable e) {
+                if (LOGGER.isLoggable(Level.WARNING))
+                    LOGGER.log(Level.WARNING, "Session[" + sessionId + "]: Exception thrown by SocketIOInbound.onMessage()", e);
+            }
+        }
+    }
+
+    public void dispatchEvent(SocketIOFrame message){
+        if (inbound != null) {
+            try {
+                Map<String, Object> event = (Map<String, Object>) JSON.parse(message.getData());
+                String eventName = (String) event.get("name");
+                Object[] objects = (Object[]) event.get("args");
+                String[] args = new String[objects.length];
+                for(int i = 0; i < objects.length; i++) {
+                    args[i] = JSON.toString(objects[i]);
+                }
+                Method callback = inbound.getClass().getDeclaredMethod("on" + eventName.substring(0, 1).toUpperCase() + eventName.substring(1), new Class[]{ String[].class });
+                callback.setAccessible(true);
+                callback.invoke(inbound, new Object[]{ args });
             } catch (Throwable e) {
                 if (LOGGER.isLoggable(Level.WARNING))
                     LOGGER.log(Level.WARNING, "Session[" + sessionId + "]: Exception thrown by SocketIOInbound.onMessage()", e);
