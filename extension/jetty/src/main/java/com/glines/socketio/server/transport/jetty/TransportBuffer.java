@@ -104,7 +104,7 @@ final class TransportBuffer {
 		}
 	}
 	
-	public boolean putMessage(String message, long timeout) {
+	public boolean putMessage(String message) {
 		BufferListener listener = listenerRef.get();
 		if (listener != null) {
 			try {
@@ -120,15 +120,11 @@ final class TransportBuffer {
 				return false;
 			}
 		} else {
-			try {
-				if (!inputSemaphore.tryAcquire(message.length(), timeout, TimeUnit.MILLISECONDS)) {
-					return false;
-				}
-				queue.offer(message);
-				return true;
-			} catch (InterruptedException e) {
+			if (!inputSemaphore.tryAcquire(message.length())) {
 				return false;
 			}
+			queue.offer(message);
+			return true;
 		}
 	}
 }

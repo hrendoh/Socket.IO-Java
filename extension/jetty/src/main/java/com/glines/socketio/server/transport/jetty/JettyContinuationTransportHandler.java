@@ -160,7 +160,7 @@ public final class JettyContinuationTransportHandler extends AbstractTransportHa
                 }
             } else {
                 String data = frame.encode();
-                if (!buffer.putMessage(data, maxIdleTime)) {
+                if (!buffer.putMessage(data)) {
                     getSession().onDisconnect(DisconnectReason.TIMEOUT);
                     abort();
                     throw new SocketIOException();
