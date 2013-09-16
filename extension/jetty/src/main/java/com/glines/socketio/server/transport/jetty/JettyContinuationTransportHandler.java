@@ -200,14 +200,10 @@ public final class JettyContinuationTransportHandler extends AbstractTransportHa
             } else {
                 if (!dataHandler.isConnectionPersistent()) {
                     if (!buffer.isEmpty()) {
-                        List<String> messages = buffer.drainMessages();
-                        if (messages.size() > 0) {
-                            StringBuilder data = new StringBuilder();
-                            for (String msg : messages) {
-                                data.append(msg);
-                            }
+                    	String msg = buffer.getMessage(maxIdleTime);
+                        if (msg != null) {
                             dataHandler.onStartSend(response);
-                            dataHandler.onWriteData(response, data.toString());
+                            dataHandler.onWriteData(response, msg);
                             dataHandler.onFinishSend(response);
                             if (!disconnectWhenEmpty) {
                                 getSession().startTimeoutTimer();
