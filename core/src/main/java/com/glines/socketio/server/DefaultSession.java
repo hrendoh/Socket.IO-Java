@@ -139,7 +139,7 @@ class DefaultSession implements SocketIOSession {
                 LOGGER.log(Level.FINE, "handler.sendMessage failed: ", e);
             handler.abort();
         }
-        startTimeoutTimer();
+        startHeartbeatTimer();
     }
 
     @Override
