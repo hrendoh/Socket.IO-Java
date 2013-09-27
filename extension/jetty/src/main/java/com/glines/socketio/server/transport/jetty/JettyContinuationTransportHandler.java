@@ -298,6 +298,8 @@ public final class JettyContinuationTransportHandler extends AbstractTransportHa
                     }
                 }
             }
+        }else{
+            getSession().startTimeoutTimer();
         }
     }
 
@@ -316,6 +318,7 @@ public final class JettyContinuationTransportHandler extends AbstractTransportHa
                 } else {
                     try {
                         dataHandler.onFinishSend(cont.getServletResponse());
+                        cont.complete();
                     } catch (IOException e) {
                         getSession().onDisconnect(DisconnectReason.DISCONNECT);
                         abort();

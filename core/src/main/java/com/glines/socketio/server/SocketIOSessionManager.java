@@ -24,14 +24,36 @@
  */
 package com.glines.socketio.server;
 
+import java.security.SecureRandom;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public final class SocketIOSessionManager implements SessionManager {
+    private static final char[] BASE64_ALPHABET =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+          .toCharArray();
+    private static final int SESSION_ID_LENGTH = 20;
 
-    final ConcurrentMap<String, SocketIOSession> socketIOSessions = new ConcurrentHashMap<String, SocketIOSession>();
+    private static Random random = new SecureRandom();
+
+    private static String generateRandomString(int length) {
+        StringBuilder result = new StringBuilder(length);
+        byte[] bytes = new byte[length];
+        random.nextBytes(bytes);
+        for (int i = 0; i < bytes.length; i++) {
+          result.append(BASE64_ALPHABET[bytes[i] & 0x3F]);
+        }
+        return result.toString();
+    }
+
+    public static String generateSessionId() {
+        return generateRandomString(SESSION_ID_LENGTH);
+    }
+
+    final private ConcurrentMap<String, SocketIOSession> socketIOSessions = new ConcurrentHashMap<String, SocketIOSession>();
     final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
     @Override
@@ -44,5 +66,9 @@ public final class SocketIOSessionManager implements SessionManager {
     @Override
     public SocketIOSession getSession(String sessionId) {
         return socketIOSessions.get(sessionId);
+    }
+
+    public void removeSession(String sessionId) {
+        this.socketIOSessions.remove(sessionId);
     }
 }

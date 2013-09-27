@@ -133,7 +133,7 @@ public abstract class SocketIOServlet extends HttpServlet {
             OutputStream os = response.getOutputStream();
 
             // Format: sessionId : heartbeat : timeout
-            String body = request.getSession().getId().toString() +
+            String body = SocketIOSessionManager.generateSessionId() +
                           ":" + (config.getString(DEFAULT_HEARTBEAT_TIMEOUT) == null ? "15000" : config.getString(DEFAULT_HEARTBEAT_TIMEOUT)) +
                           ":" + (config.getString(DEFAULT_TIMEOUT) == null? "10000" : config.getString(DEFAULT_TIMEOUT)) + ":";
 

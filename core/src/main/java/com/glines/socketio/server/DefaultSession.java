@@ -288,7 +288,7 @@ class DefaultSession implements SocketIOSession {
         if (handler == null) {
             state = ConnectionState.CLOSED;
             inbound = null;
-            socketIOSessionManager.socketIOSessions.remove(sessionId);
+            socketIOSessionManager.removeSession(sessionId);
         } else if (this.handler == null) {
             this.handler = handler;
             if (inbound == null) {
@@ -347,6 +347,7 @@ class DefaultSession implements SocketIOSession {
     public void onDisconnect(DisconnectReason reason) {
         if (LOGGER.isLoggable(Level.FINE))
             LOGGER.log(Level.FINE, "Session[" + sessionId + "]: onDisconnect: " + reason);
+
         clearTimeoutTimer();
         clearHeartbeatTimer();
         if (inbound != null) {
@@ -376,6 +377,6 @@ class DefaultSession implements SocketIOSession {
                 onDisconnect(DisconnectReason.ERROR);
             }
         }
-        socketIOSessionManager.socketIOSessions.remove(sessionId);
+        socketIOSessionManager.removeSession(sessionId);
     }
 }
