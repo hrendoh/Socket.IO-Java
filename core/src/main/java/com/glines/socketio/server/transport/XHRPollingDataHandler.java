@@ -73,7 +73,7 @@ final class XHRPollingDataHandler extends AbstractDataHandler {
 
     @Override
     public void onWriteData(ServletResponse response, String data) throws IOException {
-        response.getOutputStream().print(data);
+    	response.getOutputStream().write(data.getBytes());
         response.flushBuffer();
     }
 
